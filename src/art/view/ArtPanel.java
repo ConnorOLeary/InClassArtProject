@@ -47,15 +47,8 @@ public class ArtPanel extends JPanel{
 		edgeSlider = new JSlider(MINIMUM_SCALE, MAXIMUM_SCALE);
 		
 		canvas = new ShapeCanvas(app);
-		
-		
 		sliderPanel = new JPanel();
-		appLayout.putConstraint(SpringLayout.EAST, canvas, -57, SpringLayout.WEST, sliderPanel);
-		
-		
 		buttonPanel = new JPanel(new GridLayout(0, 1));
-		
-		
 		
 		triangleButton = new JButton("add triangle");
 		rectangleButton = new JButton("add rectangle");
@@ -135,6 +128,7 @@ public class ArtPanel extends JPanel{
 		appLayout.putConstraint(SpringLayout.NORTH, buttonPanel, 266, SpringLayout.NORTH, this);
 		appLayout.putConstraint(SpringLayout.NORTH, sliderPanel, 10, SpringLayout.NORTH, this);
 		appLayout.putConstraint(SpringLayout.WEST, sliderPanel, -382, SpringLayout.EAST, this);
+		appLayout.putConstraint(SpringLayout.EAST, canvas, -57, SpringLayout.WEST, sliderPanel);
 	}
 	
 	private boolean coinFlip()
@@ -199,6 +193,27 @@ public class ArtPanel extends JPanel{
 	
 	
 	private void setupListeners() {
+		edgeSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				if(!edgeSlider.getValueIsAdjusting())
+				{
+					currentEdgeCount = edgeSlider.getValue();
+				}
+			}
+		});
+		scaleSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				if(!scaleSlider.getValueIsAdjusting())
+				{
+					currentScale = scaleSlider.getValue();
+				}
+			}
+		});
+		
 		rectangleButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent click)
@@ -208,17 +223,35 @@ public class ArtPanel extends JPanel{
 			}
 		});
 		
-		colorButton.addActionListener(click -> canvas.changeBackground());
-		scaleSlider.addChangeListener(new ChangeListener()
+		triangleButton.addActionListener(new ActionListener()
 		{
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if(!scaleSlider.getValueIsAdjusting())
-				{
-					currentScale = scaleSlider.getValue();
-				}
+			public void actionPerformed(ActionEvent click)
+			{
+				Polygon triangle = createPolygon(3);
+				canvas.addShape(triangle);
 			}
 		});
+		
+		polygonButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent click)
+			{
+				Polygon polygon = createPolygon(currentEdgeCount);
+				canvas.addShape(polygon);
+			}
+		});
+		
+		ellipseButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent click)
+			{
+				Ellipse2D ellipse = createEllipse();
+				canvas.addShape(ellipse);
+			}
+		});
+		
+		colorButton.addActionListener(click -> canvas.changeBackground());
+
 		canvas.addMouseMotionListener(new MouseMotionListener()
 		{
 			@Override
