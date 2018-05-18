@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.*;
 import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
 
 import javax.swing.event.*;
 
@@ -46,8 +47,15 @@ public class ArtPanel extends JPanel{
 		edgeSlider = new JSlider(MINIMUM_SCALE, MAXIMUM_SCALE);
 		
 		canvas = new ShapeCanvas(app);
+		
+		
 		sliderPanel = new JPanel();
+		appLayout.putConstraint(SpringLayout.EAST, canvas, -57, SpringLayout.WEST, sliderPanel);
+		
+		
 		buttonPanel = new JPanel(new GridLayout(0, 1));
+		
+		
 		
 		triangleButton = new JButton("add triangle");
 		rectangleButton = new JButton("add rectangle");
@@ -94,7 +102,7 @@ public class ArtPanel extends JPanel{
 	private void setupPanel() {
 		this.setLayout(appLayout);
 		this.setBackground(Color.DARK_GRAY);
-		this.setPreferredSize(new Dimension(1024, 768));
+		this.setPreferredSize(new Dimension(1063, 768));
 		this.add(canvas);
 		
 		buttonPanel.setPreferredSize(new Dimension(200, 450));
@@ -116,10 +124,149 @@ public class ArtPanel extends JPanel{
 	}
 	
 	private void setupLayout() {
-		
+		appLayout.putConstraint(SpringLayout.SOUTH, buttonPanel, -142, SpringLayout.SOUTH, this);
+		appLayout.putConstraint(SpringLayout.EAST, sliderPanel, -10, SpringLayout.EAST, this);
+		appLayout.putConstraint(SpringLayout.NORTH, canvas, 26, SpringLayout.NORTH, this);
+		appLayout.putConstraint(SpringLayout.WEST, canvas, 24, SpringLayout.WEST, this);
+		appLayout.putConstraint(SpringLayout.SOUTH, canvas, -142, SpringLayout.SOUTH, this);
+		appLayout.putConstraint(SpringLayout.SOUTH, sliderPanel, -6, SpringLayout.NORTH, buttonPanel);
+		appLayout.putConstraint(SpringLayout.WEST, buttonPanel, 0, SpringLayout.WEST, sliderPanel);
+		appLayout.putConstraint(SpringLayout.EAST, buttonPanel, -10, SpringLayout.EAST, this);
+		appLayout.putConstraint(SpringLayout.NORTH, buttonPanel, 266, SpringLayout.NORTH, this);
+		appLayout.putConstraint(SpringLayout.NORTH, sliderPanel, 10, SpringLayout.NORTH, this);
+		appLayout.putConstraint(SpringLayout.WEST, sliderPanel, -382, SpringLayout.EAST, this);
 	}
 	
-	private void setupListeners() {
+	private boolean coinFlip()
+	{
+		return (int)(Math.random()*2)==0;
+	}
+	
+	private Polygon createPolygon(int sides) {
+		Polygon currentShape = new Polygon();
 		
+		int originX = (int)(Math.random()*600);
+		int originY = (int)(Math.random()*600);
+		
+		for(int index = 0; index < sides; index++)
+		{
+			int minus = coinFlip() ? -1 : 1;
+			int shiftX = (int)(Math.random() * currentScale) * minus;
+			minus = coinFlip() ? -1 : 1;
+			int shiftY = (int)(Math.random()*currentScale) * minus;
+			currentShape.addPoint(originX + shiftX,  originY + shiftY);
+		}
+		return currentShape;
+	}
+	
+	private Rectangle createRectangle()
+	{
+		Rectangle currentRectangle;
+		int cornerX = (int) (Math.random() * 600);
+		int cornerY = (int) (Math.random() * 600);
+		int width = (int)(Math.random() * currentScale) + 1;
+		if(coinFlip())
+		{
+			currentRectangle = new Rectangle(cornerX, cornerY, width, width);
+		}
+		else
+		{
+			int height = (int)(Math.random() * currentScale) + 1;
+			currentRectangle = new Rectangle(cornerX, cornerY, width, height);
+		}
+		
+		return currentRectangle;
+	}
+	
+	private Ellipse2D createEllipse()
+	{
+		Ellipse2D ellipse = new Ellipse2D.Double();
+		
+		int cornerX = (int)(Math.random() * 600);
+		int cornerY = (int)(Math.random() * 600);
+		double width = Math.random() * currentScale + 1;
+		if(coinFlip())
+		{
+			ellipse.setFrame(cornerX, cornerY, width, width);
+		}
+		else
+		{
+			int height = (int)(Math.random() * currentScale) + 1;
+			ellipse.setFrame(cornerX, cornerY, width, height);
+		}
+		return ellipse;
+	}
+	
+	
+	private void setupListeners() {
+		rectangleButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent click)
+			{
+				Rectangle rectangle = createRectangle();
+				canvas.addShape(rectangle);
+			}
+		});
+		
+		colorButton.addActionListener(click -> canvas.changeBackground());
+		scaleSlider.addChangeListener(new ChangeListener()
+		{
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if(!scaleSlider.getValueIsAdjusting())
+				{
+					currentScale = scaleSlider.getValue();
+				}
+			}
+		});
+		canvas.addMouseMotionListener(new MouseMotionListener()
+		{
+			@Override
+			public void mouseDragged(MouseEvent drag)
+			{
+				int x = drag.getX();
+				int y = drag.getY();
+				canvas.drawOnCanvas(x, y);
+			}
+			
+			@Override
+			public void mouseMoved(MouseEvent e)
+			{
+				
+			}
+			
+		});
+		canvas.addMouseListener(new MouseListener()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				
+			}
+			
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				canvas.resetLine();
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				canvas.resetLine();
+			}
+		});
 	}
 }
