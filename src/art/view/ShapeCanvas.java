@@ -36,67 +36,10 @@ public class ShapeCanvas extends JPanel{
 		this.setMaximumSize(getPreferredSize());
 	}
 	
-	public void addShape(Shape current) {
-		if(current instanceof Polygon)
-		{
-			if(((Polygon)current).xpoints.length == 3)
-			{
-				triangleList.add((Polygon) current);
-			}
-			else
-			{
-				polygonList.add((Polygon)current);
-			}
-		}
-		else if(current instanceof Ellipse2D)
-		{
-			ellipseList.add((Ellipse2D)current);
-		}
-		else
-		{
-			rectangleList.add((Rectangle) current);
-		}
-		updateImage();
-	}
-	
-	public void clear() {
-		
-	}
-	
-	public void changeBackground() {
-		
-	}
-	
-	public void drawOnCanvas(int xPosition, int yPosition)
-	{
-		Graphics2D current = canvasImage.createGraphics();
-		current.setPaint(Color.DARK_GRAY);
-		current.setStroke(new BasicStroke(3));
-		if(previousX == Integer.MIN_VALUE)
-		{
-			current.drawLine(xPosition, yPosition, xPosition, yPosition);
-		}
-		else
-		{
-			current.drawLine(previousX, previousY, xPosition, yPosition);
-		}
-		previousX = xPosition;
-		previousY = yPosition;
-		updateImage();
-	}
-	
-	public void resetLine()
-	{
-		previousX = Integer.MIN_VALUE;
-		previousY = Integer.MIN_VALUE;
-	}
-	
-	public void save() {
-		
-	}
-	
-	private Color randomColor() {
-		return Color.red;
+	@Override
+	protected void paintComponent(Graphics graphics) {
+		super.paintComponent(graphics);
+		graphics.drawImage(canvasImage, 0, 0, null);
 	}
 	
 	private void updateImage()
@@ -134,8 +77,89 @@ public class ShapeCanvas extends JPanel{
 		repaint();
 	}
 	
-	protected void paintComponent(Graphics graphics) {
-		super.paintComponent(graphics);
-		graphics.drawImage(canvasImage, 0, 0, null);
+	public void addShape(Shape current) {
+		if(current instanceof Polygon)
+		{
+			if(((Polygon)current).xpoints.length == 3)
+			{
+				triangleList.add((Polygon) current);
+			}
+			else
+			{
+				polygonList.add((Polygon)current);
+			}
+		}
+		else if(current instanceof Ellipse2D)
+		{
+			ellipseList.add((Ellipse2D)current);
+		}
+		else
+		{
+			rectangleList.add((Rectangle) current);
+		}
+		updateImage();
+	}
+	
+	public void clear() {
+		canvasImage = new BufferedImage(600, 600, BufferedImage.TYPE_INT_ARGB);
+		ellipseList.clear();
+		triangleList.clear();
+		polygonList.clear();
+		rectangleList.clear();
+		updateImage();
+	}
+	
+	public void changeBackground() {
+		Graphics2D current = canvasImage.createGraphics();
+		current.setPaint(randomColor());
+		current.fillRect(0, 0, canvasImage.getWidth(), canvasImage.getHeight());
+		updateImage();
+	}
+	
+	public void save() {
+		try
+		{
+			JFileChooser saveDialog = new JFileChooser();
+			saveDialog.showSaveDialog(app.getFrame());
+			String savePath = saveDialog.getSelectedFile().getPath();
+			ImageIO.write(canvasImage, "PNG", new File(savePath));
+		}
+		catch(IOException error)
+		{
+			app.handleErrors(error);
+		}
+	}
+	
+	private Color randomColor() {
+		int red = (int)(Math.random() * 256);
+		int green = (int)(Math.random() * 256);
+		int blue = (int)(Math.random() * 256);
+		int alpha = (int)(Math.random() * 256);
+		
+		return new Color(red, green, blue, alpha);
+	}
+	
+	public void drawOnCanvas(int xPosition, int yPosition)
+	{
+		Graphics2D current = canvasImage.createGraphics();
+		current.setPaint(Color.DARK_GRAY);
+		current.setStroke(new BasicStroke(3));
+		if(previousX == Integer.MIN_VALUE)
+		{
+			current.drawLine(xPosition, yPosition, xPosition, yPosition);
+		}
+		else
+		{
+			current.drawLine(previousX, previousY, xPosition, yPosition);
+		}
+		previousX = xPosition;
+		previousY = yPosition;
+		updateImage();
+	}
+	
+	public void resetLine()
+	{
+		previousX = Integer.MIN_VALUE;
+		previousY = Integer.MIN_VALUE;
 	}
 }
